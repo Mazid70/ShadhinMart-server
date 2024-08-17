@@ -71,6 +71,30 @@ async function run() {
         .limit(size)
         .toArray();
       res.send(products);
+      app.get('/productcount', async (req, res) => {
+        const search = req.query.search || '';
+        const brands = req.query.brands ? req.query.brands.split(',') : [];
+        const categories = req.query.categories ? req.query.categories.split(',') : [];
+        const minPrice = parseInt(req.query.minPrice) || 0;
+        const maxPrice = parseInt(req.query.maxPrice) || Infinity;
+  
+        let query = {};
+        if (search) {
+          query.productName = { $regex: search, $options: 'i' };
+        }
+        if (brands.length > 0) {
+          query.brand = { $in: brands };
+        }
+        if (categories.length > 0) {
+          query.category = { $in: categories };
+        }
+        if (minPrice || maxPrice < Infinity) {
+          query.price = { $gte: minPrice, $lte: maxPrice };
+        }
+  
+        const count = await productCollection.countDocuments(query);
+        res.send({ count });
+      });
     console.log('Pinged your deployment. You successfully connected to MongoDB!');
   } catch (error) {
     console.error('Error connecting to MongoDB:', error);
