@@ -15,7 +15,17 @@ app.use(
     credentials: true,
   })
 );
+const { MongoClient, ServerApiVersion } = require('mongodb');
 
+const uri = `mongodb+srv://${process.env.DB_ID}:${process.env.DB_PASS}@cluster0.p4xzv3m.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+
+const client = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  },
+});
 app.use(express.json());
 
 app.get('/', (req, res) => {
