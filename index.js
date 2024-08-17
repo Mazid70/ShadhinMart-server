@@ -30,6 +30,47 @@ app.use(express.json());
 async function run() {
   try {
     await client.db('admin').command({ ping: 1 });
+    const productCollection = client.db('ShadhinMart').collection('products');
+
+    app.get('/products', async (req, res) => {
+      const page = parseInt(req.query.page) || 0;
+      const size = parseInt(req.query.size) || 10;
+      const search = req.query.search || '';
+      const sort = req.query.sort || '';
+      const minPrice = parseInt(req.query.minPrice) || 0;
+      const maxPrice = parseInt(req.query.maxPrice) || Infinity;
+      const brands = req.query.brands ? req.query.brands.split(',') : [];
+      const categories = req.query.categories ? req.query.categories.split(',') : [];
+
+      let query = {};
+      if (search) {
+        query.productName = { $regex: search, $options: 'i' };
+      }
+      if (brands.length > 0) {
+        query.brand = { $in: brands };
+      }
+      if (categories.length > 0) {
+        query.category = { $in: categories };
+      }
+      if (minPrice || maxPrice < Infinity) {
+        query.price = { $gte: minPrice, $lte: maxPrice };
+      }
+
+      let options = {};
+      if (sort === 'lth') {
+        options.sort = { price: 1 };
+      } else if (sort === 'htl') {
+        options.sort = { price: -1 };
+      } else if (sort === 'date') {
+        options.sort = { createdAt: 1 };
+      }
+
+      const products = await productCollection
+        .find(query, options)
+        .skip(page * size)
+        .limit(size)
+        .toArray();
+      res.send(products);
     console.log('Pinged your deployment. You successfully connected to MongoDB!');
   } catch (error) {
     console.error('Error connecting to MongoDB:', error);
