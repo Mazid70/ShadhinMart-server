@@ -27,6 +27,16 @@ const client = new MongoClient(uri, {
   },
 });
 app.use(express.json());
+async function run() {
+  try {
+    await client.db('admin').command({ ping: 1 });
+    console.log('Pinged your deployment. You successfully connected to MongoDB!');
+  } catch (error) {
+    console.error('Error connecting to MongoDB:', error);
+  }
+}
+
+run();
 
 app.get('/', (req, res) => {
   res.send('Server is running');
