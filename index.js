@@ -11,7 +11,7 @@ app.use(
     origin: [
       'http://localhost:5174',
       'http://localhost:5173',
-      'https://assettrackerpro.netlify.app',
+      'https://shadhinmart.netlify.app',
     ],
     credentials: true,
   })
